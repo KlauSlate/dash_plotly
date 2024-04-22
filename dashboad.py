@@ -127,9 +127,9 @@ def update_investor1_histogram(selected_value):
 def update_geographic_map(selected_value):
     filtered_df = df[df['Industry'] == selected_value]
     fig = px.choropleth(filtered_df,
-                        locations='Country', 
+                        locations='Country',
+                        locationmode='country names',
                         color='Industry',
-                        size='City',
                         title='Mapa Geográfico por Industria')
     return fig
 
