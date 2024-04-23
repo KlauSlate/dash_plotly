@@ -1,10 +1,13 @@
 # se importan las librerias
-import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output
-import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
+import dash
+from dash import dcc
+from dash import html
+from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
+import warnings
+warnings.filterwarnings('ignore')
 
 # cargar los datos desde el archivos .csv
 df = pd.read_excel('unicornio_startup.xlsx')
@@ -24,28 +27,42 @@ app.layout = html.Div([
         options=industries,
         value=industries[0]['value']
     ),
-    dcc.Loading(
-        id="loading-total-startups",
-        children=[
-            html.Div(id='total-startups', style={'background-color': 'red', 'color': 'white', 'padding': '10px', 'margin-top': '10px'}),
-            html.Div(id='total-inverstor', style={'background-color': 'blue', 'color': 'white', 'padding': '10px', 'margin-top': '10px'})
-        ]
-    ),
-    dcc.Graph(id='treemap'),
-    html.Hr(), # linea horizontal para separar los graficos
-    html.H2('Heatmap de N° de inversores por industria'),
-    dcc.Graph(id='heatmap'),
-    html.Hr(), # linea horizontal para separar los graficos
-    html.H2('Linea de valorizacion en el tiempo'),
-    dcc.Graph(id='lineplot'),
-    html.Hr(), # linea horizontal para separar los graficos
-    html.H2('Histograma de los mayores inversionistas'),
-    dcc.Graph(id='investor1-histogram'),
-    html.Hr(), # linea horizontal para separar los graficos
-    html.H2('Mapa Coleptero'),
-    dcc.Graph(id='geographic-map'),
-])
 
+    dbc.Row([
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody([
+                    html.H4("Total de Startups", className="card-title"),
+                    html.P(id='total-startups', className="card-text")
+                ]),
+                color="primary", inverse=True, body=True
+            ),
+            width=7
+        ),
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody([
+                    html.H4("Total de Investor 1", className="card-title"),
+                    html.P(id='total-inverstor', className="card-text")
+                ]),
+                color="info", inverse=True
+            ),
+            width=6
+        )
+    ]),
+
+    html.Div([
+        dcc.Graph(id='treemap', style={'width': '50%', 'display': 'inline-block'}),
+        dcc.Graph(id='heatmap', style={'width': '50%', 'display': 'inline-block'})
+    ]),
+    html.Div([
+        dcc.Graph(id='lineplot', style={'width': '50%', 'display': 'inline-block'}),
+        dcc.Graph(id='investor1-histogram', style={'width': '50%', 'display': 'inline-block'})
+    ]),
+    html.Div([
+        dcc.Graph(id='geographic-map', style={'width': '100%'})
+    ])
+])
 # definir la interactividad del treemap
 @app.callback(
     Output('treemap','figure'),
@@ -97,7 +114,7 @@ def update_lineplot(selected_value):
 
 def update_total_startups(selected_value):
     total_startups = df[df['Industry'] == selected_value].shape[0]
-    return f"Total de Startups: {total_startups} para la industria {selected_value}"
+    return f"{total_startups}"
 
 # Definir el contenido del cuadro de texto para mostrar la suma total de valuación
 @app.callback(
@@ -107,7 +124,7 @@ def update_total_startups(selected_value):
 
 def update_total_valuation(selected_value):
     total_valuation = df[df['Industry'] == selected_value]['Numero Investor'].sum()
-    return f"Total del numero de inversores: {total_valuation}"
+    return f"{total_valuation}"
 
 # Definir la interactividad del histograma de Investor 1
 @app.callback(
