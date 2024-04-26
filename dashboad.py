@@ -60,7 +60,7 @@ app.layout = html.Div([
         dcc.Graph(id='investor1-histogram', style={'width': '50%', 'display': 'inline-block'})
     ]),
     html.Div([
-        dcc.Graph(id='geographic-map', style={'width': '100%'})
+        dcc.Graph(id='geographic-map', style={'width': '50%', 'display': 'inline-block'})
     ])
 ])
 # definir la interactividad del treemap
