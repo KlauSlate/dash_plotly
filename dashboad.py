@@ -103,7 +103,8 @@ def update_lineplot(selected_value):
     lineplot_data = filtered_df.groupby('Año')['Valuation ($B)'].sum().reset_index()
     fig = px.line(lineplot_data, x='Año',
                 y='Valuation ($B)',
-                title=f"Valorizacion durante los años para la industria {selected_value}")
+                labels={'Valuation ($B)': 'Valorizacion USD Billones ($B)'},
+                title=f"Valorizacion durante los años {lineplot_data.Año.min()} - {lineplot_data.Año.max()} para la industria {selected_value}")
     return fig
 
 # definir el contenido del cuadro de texto para mostrar la suma de startups
