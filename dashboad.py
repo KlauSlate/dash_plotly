@@ -46,7 +46,7 @@ app.layout = html.Div([
         dbc.Col(
             dbc.Card(
                 dbc.CardBody([
-                    html.H4("Total de Investor 1", className="card-title"),
+                    html.H4("Total de Inversores", className="card-title"),
                     html.P(id='total-inverstor', className="card-text")
                 ]),
                 color="info", inverse=True
