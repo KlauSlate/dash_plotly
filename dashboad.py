@@ -60,7 +60,7 @@ app.layout = html.Div([
         dcc.Graph(id='investor1-histogram', style={'width': '50%', 'display': 'inline-block'})
     ]),
     html.Div([
-        dcc.Graph(id='geographic-map', style={'width': '100%'})
+        dcc.Graph(id='geographic-map', style={'width': '50%', 'display': 'inline-block'})
     ])
 ])
 # definir la interactividad del treemap
@@ -103,7 +103,8 @@ def update_lineplot(selected_value):
     lineplot_data = filtered_df.groupby('Año')['Valuation ($B)'].sum().reset_index()
     fig = px.line(lineplot_data, x='Año',
                 y='Valuation ($B)',
-                title=f"Valorizacion durante los años para la industria {selected_value}")
+                labels={'Valuation ($B)': 'Valorizacion USD Billones ($B)'},
+                title=f"Valorizacion durante los años {lineplot_data.Año.min()} - {lineplot_data.Año.max()} para la industria {selected_value}")
     return fig
 
 # definir el contenido del cuadro de texto para mostrar la suma de startups
@@ -132,8 +133,13 @@ def update_total_valuation(selected_value):
     [Input('dropdown', 'value')]
 )
 def update_investor1_histogram(selected_value):
-    filtered_df = df[df['Industry'] == selected_value]
-    fig = px.histogram(filtered_df, x='Investor 1', title="Histograma de Investor 1")
+    df_filtered = df[df['Industry'] == selected_value]
+    investor_per_industry = [df_filtered[["Industry", investor]].rename(lambda x: x.split()[0], axis=1) for investor in
+                             df.columns if investor.startswith("Investor")]
+    investors = pd.concat(investor_per_industry).dropna()
+    top10 = investors.Investor.value_counts().nlargest(10).index.tolist()
+    investors_filtered = investors[investors.Investor.isin(top10)]
+    fig = px.histogram(investors_filtered, x='Investor', title=f"Número de startups por inversor TOP 10 {selected_value}")
     return fig
 
 # Definir la interactividad del coleoptero
