@@ -20,8 +20,12 @@ industries = [{'label':industry, 'value':industry} for industry in df['Industry'
 
 # definir el diseño de la aplicacion
 app.layout = html.Div([
-    html.H1('Dashboard de Startup Unicornios'),
-    html.Label('Selecciona la industria para visualizar el grafico:'),
+    html.H1('Dashboard de Startup Unicornios', style={'textAlign': 'center'}),
+    html.H4('Objetivo del Dashboard:'),
+    html.H4('1.-Brindar información completa y actualizada sobre startups unicornio (empresas valoradas en más de mil millones de dólares) a potenciales inversionistas y startups'),
+    html.H4('2.- Empoderar a los inversionistas ángeles con información completa y actualizada sobre startups unicornio para tomar decisiones de inversión más informadas y acceder a las oportunidades de inversión más prometedoras'),
+    html.H4('3.- Brindar a las startups acceso a información valiosa sobre las empresas unicornio por industria y los inversores más interesados en cada una, para que puedan aprender de las mejores y posicionarse para el éxito.'),
+    html.Label('Seleccionar una industria para visualizar el grafico:'),
     dcc.Dropdown(
         id='dropdown',
         options=industries,
@@ -60,7 +64,7 @@ app.layout = html.Div([
         dcc.Graph(id='investor1-histogram', style={'width': '50%', 'display': 'inline-block'})
     ]),
     html.Div([
-        dcc.Graph(id='geographic-map', style={'width': '100%'})
+        dcc.Graph(id='geographic-map', style={'width': '50%', 'display': 'inline-block'})
     ])
 ])
 # definir la interactividad del treemap
@@ -73,7 +77,7 @@ def update_treemap(selected_value):
     filtered_df = df[df['Industry'] == selected_value]
     fig = px.treemap(filtered_df, path=[px.Constant('Industry'),'Country','Company'],
                     values='Valuation ($B)',
-                    title=f'Treemap de valorizacion para {selected_value}')
+                    title=f'Mapa de startups para {selected_value}')
     return fig
 
 # definir la interactividad del heatmap
@@ -89,7 +93,10 @@ def update_heatmap(selected_value):
                     labels=dict(x="Country", y="Industry", color="Count"),
                     x=list(heatmap_data.columns),
                     y=list(heatmap_data.index),
-                    title=f"Numero de inversores para la industria {selected_value} por pais")
+                    text_auto=True,
+                    aspect='auto',
+                    color_continuous_scale='purpor',
+                    title=f"Cantidad inversores para la industria {selected_value} por pais")
     return fig
 
 # definir la interactividad del line plot
@@ -103,7 +110,8 @@ def update_lineplot(selected_value):
     lineplot_data = filtered_df.groupby('Año')['Valuation ($B)'].sum().reset_index()
     fig = px.line(lineplot_data, x='Año',
                 y='Valuation ($B)',
-                title=f"Valorizacion durante los años para la industria {selected_value}")
+                labels={'Valuation ($B)': 'Valorizacion USD Billones ($B)'},
+                title=f"Valorizacion durante los años {lineplot_data.Año.min()} - {lineplot_data.Año.max()} para la industria {selected_value}")
     return fig
 
 # definir el contenido del cuadro de texto para mostrar la suma de startups
@@ -132,8 +140,13 @@ def update_total_valuation(selected_value):
     [Input('dropdown', 'value')]
 )
 def update_investor1_histogram(selected_value):
-    filtered_df = df[df['Industry'] == selected_value]
-    fig = px.histogram(filtered_df, x='Investor 1', title="Histograma de Investor 1")
+    df_filtered = df[df['Industry'] == selected_value]
+    investor_per_industry = [df_filtered[["Industry", investor]].rename(lambda x: x.split()[0], axis=1) for investor in
+                             df.columns if investor.startswith("Investor")]
+    investors = pd.concat(investor_per_industry).dropna()
+    top10 = investors.Investor.value_counts().nlargest(10).index.tolist()
+    investors_filtered = investors[investors.Investor.isin(top10)]
+    fig = px.histogram(investors_filtered, x='Investor', title=f"Número de startups por inversor TOP 10 {selected_value}")
     return fig
 
 # Definir la interactividad del coleoptero
